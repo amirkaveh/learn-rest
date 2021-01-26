@@ -13,12 +13,6 @@ public class Document {
     public Document() {
     }
 
-    public Document(long id, String name, String content) {
-        this.id = id;
-        this.name = name;
-        this.content = content;
-    }
-
     public Long getId() {
         return id;
     }

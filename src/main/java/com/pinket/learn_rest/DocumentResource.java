@@ -10,31 +10,23 @@ import java.util.*;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class DocumentResource {
-    private static final Map<Long, Document> documentsDB = new HashMap<>();
-
-    public static Map<Long, Document> getDocumentsDB() {
-        return documentsDB;
-    }
-
     @GET
     public List<Document> getDocuments() {
-        return new ArrayList<>(DocumentResource.documentsDB.values());
+        return DocumentMGR.getDocuments();
     }
 
     @GET
     @Path("{id}")
-    public Document getDocuments(@PathParam("id") String id) {
-        Long longId = Long.parseLong(id);
-        return DocumentResource.documentsDB.get(longId);
+    public Document getDocuments(@PathParam("id") Long id) throws Exception {
+        return DocumentMGR.getDocuments(id);
     }
 
     @POST
     public Response createDocument(Document document) {
-        if(DocumentResource.documentsDB.get(document.getId()) == null) {
-            DocumentResource.documentsDB.put(document.getId(), document);
+        try {
+            DocumentMGR.saveDocument(document);
             return Response.status(Status.CREATED).entity(document).build();
-        }
-        else {
+        } catch (Exception e) {
             return Response.status(Status.CONFLICT).entity(document).build();
         }
     }
@@ -42,19 +34,18 @@ public class DocumentResource {
     @DELETE
     @Path("{id}")
     public Document deleteDocument(@PathParam("id") Long id) {
-        return DocumentResource.documentsDB.remove(id);
+        return DocumentMGR.deleteDocument(id);
     }
 
     @POST
     @Path("{id}/update")
     public Response updateDocument(@PathParam("id") Long id, Document document) {
         document.setId(id);
-        if(DocumentResource.documentsDB.get(id) == null) {
-            return Response.status(Status.NOT_FOUND).entity(document).build();
-        }
-        else {
-            DocumentResource.documentsDB.replace(id, document);
+        try {
+            DocumentMGR.updateDocument(document);
             return Response.status(Status.OK).entity(document).build();
+        } catch (Exception e) {
+            return Response.status(Status.NOT_FOUND).entity(document).build();
         }
     }
 }

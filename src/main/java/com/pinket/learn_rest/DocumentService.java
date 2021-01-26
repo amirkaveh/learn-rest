@@ -10,8 +10,7 @@ public class DocumentService {
 
     @POST
     @Path("{id}/appendContent")
-    public void appendContent(@PathParam("id") Long id, DocumentContentDTO contentDTO) {
-        Document document = DocumentResource.getDocumentsDB().get(id);
-        document.setContent(document.getContent() + contentDTO.getContent());
+    public Document appendContent(@PathParam("id") Long id, DocumentContentDTO contentDTO) throws Exception {
+        return DocumentMGR.appendDocumentContent(id, contentDTO);
     }
 }
