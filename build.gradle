@@ -23,6 +23,7 @@ dependencies {
     implementation('org.glassfish.jersey.media:jersey-media-json-jackson:2.31')
     implementation('org.glassfish.jersey.inject:jersey-hk2:2.31')
     implementation('com.fasterxml.jackson.core:jackson-databind:2.12.1')
+    implementation('org.postgresql:postgresql:42.2.18')
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")

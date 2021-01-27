@@ -11,7 +11,7 @@ import java.util.*;
 @Consumes(MediaType.APPLICATION_JSON)
 public class DocumentResource {
     @GET
-    public List<Document> getDocuments() {
+    public List<Document> getDocuments() throws Exception {
         return DocumentMGR.getDocuments();
     }
 
@@ -33,7 +33,7 @@ public class DocumentResource {
 
     @DELETE
     @Path("{id}")
-    public Document deleteDocument(@PathParam("id") Long id) {
+    public Document deleteDocument(@PathParam("id") Long id) throws Exception {
         return DocumentMGR.deleteDocument(id);
     }
 
@@ -42,7 +42,7 @@ public class DocumentResource {
     public Response updateDocument(@PathParam("id") Long id, Document document) {
         document.setId(id);
         try {
-            DocumentMGR.updateDocument(document);
+            document = DocumentMGR.updateDocument(document);
             return Response.status(Status.OK).entity(document).build();
         } catch (Exception e) {
             return Response.status(Status.NOT_FOUND).entity(document).build();

@@ -4,23 +4,27 @@ import java.util.List;
 
 public class DocumentMGR {
     public static Document getDocuments(Long id) throws Exception {
-        return DocumentDAO.getDocuments(id);
+        Document document = DocumentDAOJDBC.getDocuments(id);
+        if (document == null) {
+            throw new Exception("Not Found");
+        }
+        return document;
     }
 
-    public static List<Document> getDocuments() {
-        return DocumentDAO.getDocuments();
+    public static List<Document> getDocuments() throws Exception {
+        return DocumentDAOJDBC.getDocuments();
     }
 
     public static Document saveDocument(Document document) throws Exception {
-        return DocumentDAO.saveDocument(document);
+        return DocumentDAOJDBC.saveDocument(document);
     }
 
     public static Document updateDocument(Document document) throws Exception {
-        return DocumentDAO.updateDocument(document);
+        return DocumentDAOJDBC.updateDocument(document);
     }
 
-    public static Document deleteDocument(Long id) {
-        return DocumentDAO.deleteDocument(id);
+    public static Document deleteDocument(Long id) throws Exception {
+        return DocumentDAOJDBC.deleteDocument(id);
     }
 
     public static Document appendDocumentContent(Long id, DocumentContentDTO contentDTO) throws Exception {
