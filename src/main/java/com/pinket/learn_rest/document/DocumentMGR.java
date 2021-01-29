@@ -1,33 +1,37 @@
 package com.pinket.learn_rest.document;
 
+import com.pinket.exceptions.ConflictException;
+import com.pinket.exceptions.DBException;
+import com.pinket.exceptions.NotFoundException;
+
 import java.util.List;
 
 public class DocumentMGR {
-    public static Document getDocuments(Long id) throws Exception {
+    public static Document getDocuments(Long id) throws DBException, NotFoundException {
         Document document = DocumentDAOJDBC.getDocuments(id);
         if (document == null) {
-            throw new Exception("Not Found");
+            throw new NotFoundException();
         }
         return document;
     }
 
-    public static List<Document> getDocuments() throws Exception {
+    public static List<Document> getDocuments() throws DBException {
         return DocumentDAOJDBC.getDocuments();
     }
 
-    public static Document saveDocument(Document document) throws Exception {
+    public static Document saveDocument(Document document) throws DBException, ConflictException {
         return DocumentDAOJDBC.saveDocument(document);
     }
 
-    public static Document updateDocument(Document document) throws Exception {
+    public static Document updateDocument(Document document) throws DBException, NotFoundException {
         return DocumentDAOJDBC.updateDocument(document);
     }
 
-    public static Document deleteDocument(Long id) throws Exception {
+    public static Document deleteDocument(Long id) throws DBException {
         return DocumentDAOJDBC.deleteDocument(id);
     }
 
-    public static Document appendDocumentContent(Long id, DocumentContentDTO contentDTO) throws Exception {
+    public static Document appendDocumentContent(Long id, DocumentContentDTO contentDTO) throws DBException, NotFoundException {
         Document document = getDocuments(id);
         document.setContent(document.getContent() + contentDTO.getContent());
         return updateDocument(document);
