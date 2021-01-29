@@ -1,4 +1,4 @@
-package com.pinket.learn_rest;
+package com.pinket.learn_rest.hello;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

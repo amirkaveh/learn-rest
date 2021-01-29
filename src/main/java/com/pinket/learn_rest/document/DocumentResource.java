@@ -1,4 +1,4 @@
-package com.pinket.learn_rest;
+package com.pinket.learn_rest.document;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;

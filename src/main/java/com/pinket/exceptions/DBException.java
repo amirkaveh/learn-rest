@@ -1,4 +1,4 @@
-package com.pinket.learn_rest;
+package com.pinket.exceptions;
 
 public class DBException extends Exception {
     public DBException() {

@@ -1,4 +1,9 @@
-package com.pinket.learn_rest;
+package com.pinket.learn_rest.document;
+
+import com.pinket.exceptions.ConflictException;
+import com.pinket.exceptions.DBException;
+import com.pinket.exceptions.NotFoundException;
+import com.pinket.learn_rest.Credentials;
 
 import java.util.*;
 import java.sql.*;

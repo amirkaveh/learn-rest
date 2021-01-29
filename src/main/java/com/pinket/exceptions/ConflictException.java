@@ -1,4 +1,4 @@
-package com.pinket.learn_rest;
+package com.pinket.exceptions;
 
 public class ConflictException extends Exception {
     public ConflictException() {
