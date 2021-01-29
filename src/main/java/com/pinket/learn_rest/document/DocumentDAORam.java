@@ -4,7 +4,7 @@ import java.util.*;
 
 import static java.lang.Math.abs;
 
-public class DocumentDAO {
+public class DocumentDAORam {
     private static final Map<Long, Document> documentsDB = new HashMap<>();
 
     public static Document getDocuments(Long id) throws Exception {
