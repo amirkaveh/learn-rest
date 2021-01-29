@@ -16,7 +16,7 @@ public class DocumentDAOJDBC {
     private static final String DB_PASS = Credentials.POSTGRES_DB_PASSWORD;
     private static Connection connection = null;
 
-    private static void openConnection() throws Exception {
+    private static void openConnection() throws DBException {
         if (connection == null) {
             newConnection();
             return;
@@ -31,28 +31,28 @@ public class DocumentDAOJDBC {
         }
     }
 
-    private static void newConnection() throws Exception {
+    private static void newConnection() throws DBException {
         try {
             Class.forName(JDBC_DRIVER);
             connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
         } catch (ClassNotFoundException | SQLException e) {
-            throw new Exception("DB Problem: " + e.getMessage());
+            throw new DBException(e);
         }
     }
 
-    private static Document makeDocument(ResultSet resultSet) throws Exception {
+    private static Document makeDocument(ResultSet resultSet) throws DBException {
         Document document = new Document();
         try {
             document.setId(resultSet.getLong("id"));
             document.setName(resultSet.getString("name"));
             document.setContent(resultSet.getString("content"));
         } catch (SQLException e) {
-            throw new Exception("DB Problem: " + e.getMessage());
+            throw new DBException(e);
         }
         return document;
     }
 
-    public static Document getDocuments(Long id) throws Exception {
+    public static Document getDocuments(Long id) throws DBException {
         openConnection();
         Document document = null;
         String sqlString = "SELECT id, name, content FROM \"Documents\" WHERE id=" + id + ";";
@@ -64,12 +64,12 @@ public class DocumentDAOJDBC {
                 document = makeDocument(resultSet);
             }
         } catch (SQLException e) {
-            throw new Exception("DB Problem: " + e.getMessage());
+            throw new DBException(e);
         }
         return document;
     }
 
-    public static List<Document> getDocuments() throws Exception {
+    public static List<Document> getDocuments() throws DBException {
         openConnection();
         String sqlString = "SELECT id, name, content FROM \"Documents\";";
         try (
@@ -82,13 +82,13 @@ public class DocumentDAOJDBC {
             }
             return documents;
         } catch (SQLException e) {
-            throw new Exception("DB Problem: " + e.getMessage());
+            throw new DBException(e);
         }
     }
 
-    public static Document saveDocument(Document document) throws Exception {
+    public static Document saveDocument(Document document) throws DBException, ConflictException {
         if (document.getId() != null && getDocuments(document.getId()) != null) {
-            throw new Exception("Conflict with other document");
+            throw new ConflictException();
         }
         if (document.getId() == null) {
             Long id;
@@ -102,15 +102,15 @@ public class DocumentDAOJDBC {
         try (Statement statement = connection.createStatement()) {
             statement.executeUpdate(queryString);
         } catch (SQLException e) {
-            throw new Exception("DB Problem: " + e.getMessage());
+            throw new DBException(e);
         }
         return document;
     }
 
-    public static Document updateDocument(Document document) throws Exception {
+    public static Document updateDocument(Document document) throws DBException, NotFoundException {
         Document dbDocument = getDocuments(document.getId());
         if (dbDocument == null) {
-            throw new Exception("Not Found");
+            throw new NotFoundException();
         }
         List<String> updates = new ArrayList<>();
         if (document.getName() != null) {
@@ -133,19 +133,19 @@ public class DocumentDAOJDBC {
             try (Statement statement = connection.createStatement()) {
                 statement.executeUpdate(queryString.toString());
             } catch (SQLException e) {
-                throw new Exception("DB Problem: " + e.getMessage());
+                throw new DBException(e);
             }
         }
         return dbDocument;
     }
 
-    public static Document saveOrUpdateDocument(Document document) throws Exception {
+    public static Document saveOrUpdateDocument(Document document) throws DBException, NotFoundException, ConflictException {
         if (getDocuments(document.getId()) != null) {
             return updateDocument(document);
         } else return saveDocument(document);
     }
 
-    public static Document deleteDocument(Long id) throws Exception {
+    public static Document deleteDocument(Long id) throws DBException {
         openConnection();
         String queryString = "DELETE FROM \"Documents\" WHERE id = " + id + " RETURNING id, name, content;";
         try (
@@ -157,7 +157,7 @@ public class DocumentDAOJDBC {
             }
             return null;
         } catch (SQLException e) {
-            throw new Exception("DB Problem: " + e.getMessage());
+            throw new DBException(e);
         }
     }
 
