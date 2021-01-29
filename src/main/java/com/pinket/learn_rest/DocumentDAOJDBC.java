@@ -8,19 +8,25 @@ import static java.lang.Math.abs;
 public class DocumentDAOJDBC {
     private static final String JDBC_DRIVER = "org.postgresql.Driver";
     private static final String DB_URL = Credentials.POSTGRES_DB_URL;
+    /*
+    format:     "jdbc:DATABASE://IP:PORT/DB_NAME"
+    example:    "jdbc:postgresql://localhost:5432/example_db"
+     */
     private static final String DB_USER = Credentials.POSTGRES_DB_USERNAME;
     private static final String DB_PASS = Credentials.POSTGRES_DB_PASSWORD;
     private static Connection connection = null;
 
     private static void openConnection() throws Exception {
+        if (connection == null) {
+            newConnection();
+            return;
+        }
         try {
-            if (connection == null) {
-                newConnection();
-            } else if (connection.isClosed() || !connection.isValid(5)) {
+            if (connection.isClosed() || !connection.isValid(5)) {
                 connection.close();
-                newConnection();
             }
-        } catch (SQLException e) {
+        } catch (SQLException ignored) {
+        } finally {
             newConnection();
         }
     }
@@ -49,14 +55,13 @@ public class DocumentDAOJDBC {
     public static Document getDocuments(Long id) throws Exception {
         openConnection();
         Document document = null;
-        try (Statement statement = connection.createStatement()){
-            String sqlString = "SELECT id, name, content FROM \"Documents\" WHERE id=" + id + ";";
-            ResultSet resultSet = statement.executeQuery(sqlString);
+        String sqlString = "SELECT id, name, content FROM \"Documents\" WHERE id=" + id + ";";
+        try (
+                Statement statement = connection.createStatement();
+                ResultSet resultSet = statement.executeQuery(sqlString)
+        ) {
             if (resultSet.next()) {
                 document = makeDocument(resultSet);
-                resultSet.close();
-                statement.close();
-
             }
         } catch (SQLException e) {
             throw new Exception("DB Problem: " + e.getMessage());
@@ -66,16 +71,15 @@ public class DocumentDAOJDBC {
 
     public static List<Document> getDocuments() throws Exception {
         openConnection();
-        try {
-            Statement statement = connection.createStatement();
-            String sqlString = "SELECT id, name, content FROM \"Documents\";";
-            ResultSet resultSet = statement.executeQuery(sqlString);
+        String sqlString = "SELECT id, name, content FROM \"Documents\";";
+        try (
+                Statement statement = connection.createStatement();
+                ResultSet resultSet = statement.executeQuery(sqlString)
+        ) {
             List<Document> documents = new ArrayList<>();
             while (resultSet.next()) {
                 documents.add(makeDocument(resultSet));
             }
-            resultSet.close();
-            statement.close();
             return documents;
         } catch (SQLException e) {
             throw new Exception("DB Problem: " + e.getMessage());
@@ -94,11 +98,9 @@ public class DocumentDAOJDBC {
             document.setId(id);
         }
         openConnection();
-        try {
-            Statement statement = connection.createStatement();
-            String queryString = "INSERT INTO \"Documents\" (id, name, content) VALUES (" + document.getId() + ",'" + document.getName() + "','" + document.getContent() + "');";
+        String queryString = "INSERT INTO \"Documents\" (id, name, content) VALUES (" + document.getId() + ",'" + document.getName() + "','" + document.getContent() + "');";
+        try (Statement statement = connection.createStatement()) {
             statement.executeUpdate(queryString);
-            statement.close();
         } catch (SQLException e) {
             throw new Exception("DB Problem: " + e.getMessage());
         }
@@ -121,16 +123,15 @@ public class DocumentDAOJDBC {
         }
         if (updates.size() != 0) {
             openConnection();
-            try {
-                Statement statement = connection.createStatement();
-                StringBuilder queryString = new StringBuilder("UPDATE \"Documents\" SET ");
-                for (String update : updates) {
-                    queryString.append(update).append(", ");
-                }
-                queryString.setLength(queryString.length() - 2);
-                queryString.append(" WHERE id = ").append(document.getId()).append(";");
+            StringBuilder queryString = new StringBuilder("UPDATE \"Documents\" SET ");
+            for (String update : updates) {
+                queryString.append(update).append(", ");
+            }
+            queryString.setLength(queryString.length() - 2);
+            queryString.append(" WHERE id = ").append(document.getId()).append(";");
+
+            try (Statement statement = connection.createStatement()) {
                 statement.executeUpdate(queryString.toString());
-                statement.close();
             } catch (SQLException e) {
                 throw new Exception("DB Problem: " + e.getMessage());
             }
@@ -141,24 +142,23 @@ public class DocumentDAOJDBC {
     public static Document saveOrUpdateDocument(Document document) throws Exception {
         if (getDocuments(document.getId()) != null) {
             return updateDocument(document);
-        }
-        else return saveDocument(document);
+        } else return saveDocument(document);
     }
 
     public static Document deleteDocument(Long id) throws Exception {
         openConnection();
-        Document document = null;
-        try {
-            Statement statement = connection.createStatement();
-            String queryString = "DELETE FROM \"Documents\" WHERE id = " + id + " RETURNING id, name, content;";
-            ResultSet resultSet = statement.executeQuery(queryString);
+        String queryString = "DELETE FROM \"Documents\" WHERE id = " + id + " RETURNING id, name, content;";
+        try (
+                Statement statement = connection.createStatement();
+                ResultSet resultSet = statement.executeQuery(queryString)
+        ) {
             if (resultSet.next()) {
-                document = makeDocument(resultSet);
+                return makeDocument(resultSet);
             }
+            return null;
         } catch (SQLException e) {
             throw new Exception("DB Problem: " + e.getMessage());
         }
-        return document;
     }
 
 
