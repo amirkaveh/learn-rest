@@ -1,5 +1,9 @@
 # passwords and credentials
 Credentials.java
+hibernate.properties
+
+# IntelliJ
+out/
 
 ###
 ### from https://github.com/github/gitignore/blob/master/Java.gitignore
