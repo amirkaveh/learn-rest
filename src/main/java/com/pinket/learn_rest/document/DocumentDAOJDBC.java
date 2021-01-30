@@ -60,13 +60,13 @@ public class DocumentDAOJDBC {
     public static Document getDocuments(Long id) throws DBException {
         openConnection();
         Document document = null;
-        String sqlString = "SELECT id, name, content FROM \"Documents\" WHERE id=" + id + ";";
-        try (
-                Statement statement = connection.createStatement();
-                ResultSet resultSet = statement.executeQuery(sqlString)
-        ) {
-            if (resultSet.next()) {
-                document = makeDocument(resultSet);
+        String sqlString = "SELECT id, name, content FROM \"Documents\" WHERE id = ? ;";
+        try (PreparedStatement statement = connection.prepareStatement(sqlString)) {
+            statement.setLong(1, id);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    document = makeDocument(resultSet);
+                }
             }
         } catch (SQLException e) {
             throw new DBException(e);
@@ -103,9 +103,12 @@ public class DocumentDAOJDBC {
             document.setId(id);
         }
         openConnection();
-        String queryString = "INSERT INTO \"Documents\" (id, name, content) VALUES (" + document.getId() + ",'" + document.getName() + "','" + document.getContent() + "');";
-        try (Statement statement = connection.createStatement()) {
-            statement.executeUpdate(queryString);
+        String queryString = "INSERT INTO \"Documents\" (id, name, content) VALUES (?, ?, ?);";
+        try (PreparedStatement statement = connection.prepareStatement(queryString)) {
+            statement.setLong(1, document.getId());
+            statement.setString(2, document.getName());
+            statement.setString(3, document.getContent());
+            statement.executeUpdate();
         } catch (SQLException e) {
             throw new DBException(e);
         }
@@ -118,25 +121,28 @@ public class DocumentDAOJDBC {
             throw new NotFoundException();
         }
         List<String> updates = new ArrayList<>();
+        List<Object> parameters = new ArrayList<>();
         if (document.getName() != null) {
-            updates.add("name = '" + document.getName() + "'");
+            updates.add("name = ?");
+            parameters.add(document.getName());
             dbDocument.setName(document.getName());
         }
         if (document.getContent() != null) {
-            updates.add("content = '" + document.getContent() + "'");
+            updates.add("content = ?");
+            parameters.add(document.getContent());
             dbDocument.setContent(document.getContent());
         }
+        parameters.add(document.getId());
         if (updates.size() != 0) {
             openConnection();
-            StringBuilder queryString = new StringBuilder("UPDATE \"Documents\" SET ");
-            for (String update : updates) {
-                queryString.append(update).append(", ");
-            }
-            queryString.setLength(queryString.length() - 2);
-            queryString.append(" WHERE id = ").append(document.getId()).append(";");
-
-            try (Statement statement = connection.createStatement()) {
-                statement.executeUpdate(queryString.toString());
+            String queryString = "UPDATE \"Documents\" SET " + String.join(", ", updates) + " WHERE id = ?;";
+            try (PreparedStatement statement = connection.prepareStatement(queryString)) {
+                int i = 1;
+                for (Object param : parameters) {
+                    statement.setObject(i, param);
+                    i++;
+                }
+                statement.executeUpdate();
             } catch (SQLException e) {
                 throw new DBException(e);
             }
@@ -152,15 +158,15 @@ public class DocumentDAOJDBC {
 
     public static Document deleteDocument(Long id) throws DBException {
         openConnection();
-        String queryString = "DELETE FROM \"Documents\" WHERE id = " + id + " RETURNING id, name, content;";
-        try (
-                Statement statement = connection.createStatement();
-                ResultSet resultSet = statement.executeQuery(queryString)
-        ) {
-            if (resultSet.next()) {
-                return makeDocument(resultSet);
+        String queryString = "DELETE FROM \"Documents\" WHERE id = ? RETURNING id, name, content;";
+        try (PreparedStatement statement = connection.prepareStatement(queryString)) {
+            statement.setLong(1, id);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return makeDocument(resultSet);
+                }
+                return null;
             }
-            return null;
         } catch (SQLException e) {
             throw new DBException(e);
         }
