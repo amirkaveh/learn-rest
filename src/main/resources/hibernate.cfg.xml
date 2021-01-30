@@ -4,14 +4,16 @@
     "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
 <hibernate-configuration>
   <session-factory>
-      <!-- Configured connection parameters in hibernate.properties for security reasons. -->
+      <property name="connection.driver_class">org.postgresql.Driver</property>
 
-      <!--    <property name="connection.url"/> -->
-      <!--    <property name="connection.driver_class"/> -->
-      <!--    <property name="connection.username"/> -->
-      <!--    <property name="connection.password"/> -->
+      <!-- Configured connection parameters in hibernate.properties for security reasons. -->
+      <!-- <property name="connection.url"/> -->
+      <!-- <property name="connection.username"/> -->
+      <!-- <property name="connection.password"/> -->
 
       <!-- DB schema will be updated if needed -->
       <!-- <property name="hibernate.hbm2ddl.auto">update</property> -->
+
+      <mapping resource="hbm/Document.hbm.xml"/>
   </session-factory>
 </hibernate-configuration>

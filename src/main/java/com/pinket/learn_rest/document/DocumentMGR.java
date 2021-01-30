@@ -8,7 +8,7 @@ import java.util.List;
 
 public class DocumentMGR {
     public static Document getDocuments(Long id) throws DBException, NotFoundException {
-        Document document = DocumentDAOJDBC.getDocuments(id);
+        Document document = DocumentDAOHibernate.getDocuments(id);
         if (document == null) {
             throw new NotFoundException();
         }
@@ -16,7 +16,7 @@ public class DocumentMGR {
     }
 
     public static List<Document> getDocuments() throws DBException {
-        return DocumentDAOJDBC.getDocuments();
+        return DocumentDAOHibernate.getDocuments();
     }
 
     public static Document saveDocument(Document document) throws DBException, ConflictException {
