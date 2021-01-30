@@ -6,7 +6,15 @@
   <session-factory>
       <property name="connection.driver_class">org.postgresql.Driver</property>
 
-      <!-- Configured connection parameters in hibernate.properties for security reasons. -->
+      <!--
+      Configured connection parameters in hibernate.properties for security reasons.
+      Place hibernate.properties file next to this file.
+      put following parameters in hibernate.properties:
+        hibernate.connection.url = DB_URL
+        hibernate.connection.username = DB_USERNAME
+        hibernate.connection.password = DB_PASSWORD
+      -->
+
       <!-- <property name="connection.url"/> -->
       <!-- <property name="connection.username"/> -->
       <!-- <property name="connection.password"/> -->
