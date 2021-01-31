@@ -20,19 +20,19 @@ public class DocumentMGR {
     }
 
     public static Document saveDocument(Document document) throws DBException, ConflictException {
-        return DocumentDAOJDBC.saveDocument(document);
+        return DocumentDAOHibernate.saveDocument(document);
     }
 
     public static Document updateDocument(Document document) throws DBException, NotFoundException {
-        return DocumentDAOJDBC.updateDocument(document);
+        return DocumentDAOHibernate.updateDocument(document);
     }
 
     public static Document deleteDocument(Long id) throws DBException {
-        return DocumentDAOJDBC.deleteDocument(id);
+        return DocumentDAOHibernate.deleteDocument(id);
     }
 
     public static Document appendDocumentContent(Long id, DocumentContentDTO contentDTO) throws DBException, NotFoundException {
-        return DocumentDAOJDBC.appendDocumentContent(id, contentDTO.getContent());
+        return DocumentDAOHibernate.appendDocumentContent(id, contentDTO.getContent());
     }
 
 }
