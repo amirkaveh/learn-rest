@@ -172,5 +172,24 @@ public class DocumentDAOJDBC {
         }
     }
 
+    public static Document appendDocumentContent(Long id, String content) throws DBException, NotFoundException {
+        if (getDocuments(id) == null) {
+            throw new NotFoundException();
+        }
+        openConnection();
+        String queryString = "UPDATE \"Documents\" SET content = CONCAT(content, ?) WHERE id = ? RETURNING id, name, content;";
+        try (PreparedStatement statement = connection.prepareStatement(queryString)) {
+            statement.setString(1, content);
+            statement.setLong(2, id);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return makeDocument(resultSet);
+                }
+                return null;
+            }
+        } catch (SQLException e) {
+            throw new DBException(e);
+        }
+    }
 
 }

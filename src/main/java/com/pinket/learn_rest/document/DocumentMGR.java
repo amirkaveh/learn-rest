@@ -32,9 +32,7 @@ public class DocumentMGR {
     }
 
     public static Document appendDocumentContent(Long id, DocumentContentDTO contentDTO) throws DBException, NotFoundException {
-        Document document = getDocuments(id);
-        document.setContent(document.getContent() + contentDTO.getContent());
-        return updateDocument(document);
+        return DocumentDAOJDBC.appendDocumentContent(id, contentDTO.getContent());
     }
 
 }
